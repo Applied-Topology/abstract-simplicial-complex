@@ -1,3 +1,8 @@
+import networkx as nx
+from networkx.drawing.nx_agraph import write_dot, graphviz_layout
+import matplotlib.pyplot as plt
+from copy import deepcopy
+
 class Node:
     
     def __init__(self, name, children=dict()):
@@ -34,7 +39,11 @@ class ASC_Tree:
                 cur_parent.children[name] = new_node
             else:
                 new_node = cur_parent.children[name] 
-            
+                
+            # add to root:
+            if name not in self.root.children:
+                self.root.children[name] = deepcopy(new_node)
+                
             cur_parent = new_node
     
     def search(self, cur_node, visited =[]):
@@ -53,6 +62,50 @@ class ASC_Tree:
         ]
         self.path_cache = []
         return path_list
+    
+    def get_edges(self):
+        stack = []
+        stack.append(self.root)
+        
+        visited = [stack[0]]
+        
+        edges = []
+        while stack:
+            cur_node = stack.pop()
+            for child in cur_node.children.values():
+                edges.append([cur_node, child])
+                stack.append(child)
+                visited.append(child)
+        
+        return visited, edges
+    
+    def build_networkx_graph(self, name='nx_test.png'):
+        nodes, edges = self.get_edges()
+        
+        G = nx.DiGraph()
+        
+        G.add_nodes_from(
+            [id(node) for node in nodes],
+            data = [node.name for node in nodes]
+        )
+        
+        G.add_edges_from(
+            [(id(x), id(y)) for x,y in edges]
+        )
+        
+        labels = {id(node): node.name for node in nodes}
+        
+        write_dot(G,'test.dot')
+
+        plt.title('draw_networkx')
+        pos =graphviz_layout(G, prog='dot')
+
+        nx.draw(
+            G, pos, with_labels=True, arrows=True,
+            labels=labels, alpha= 0.5, font_size=5.7,
+            node_size=420, node_color="#e6e6ff"
+        )
+        plt.savefig(name)
 
     
 if __name__ == "__main__":
