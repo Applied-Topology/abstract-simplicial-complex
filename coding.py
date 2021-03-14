@@ -44,14 +44,19 @@ def boundary_matrix(dim, representation):
     generators_pre = []
     generators_post = []
     for r in representation:
-        if len(r) == dim+1:
+        if len(r) > dim+1:
+            s = get_subsimplices(r, dim)
+            generators_pre += s
+            for t in s:
+                generators_post = union_list_set(generators_post, get_subsimplices(t, dim-1))
+        elif len(r) == dim+1:
             generators_pre.append(r) 
             generators_post = union_list_set(generators_post, get_subsimplices(r, dim-1))
 
     matrix = [] 
     for post in generators_post:
         matrix.append([1 if post.issubset(pre) else 0 for pre in generators_pre])
-    return matrix 
+    return matrix, generators_pre, generators_post
 
 
 def mk_complex(sc_list):
@@ -90,9 +95,27 @@ def main():
     vertices = ['Cow', 'Rabbit', 'Horse', 'Dog', 'Fish', 'Dolphin', 'Oyster', 'Broccoli', 'Fern', 'Onion', 'Apple']
     edges_a = [{'Cow', 'Rabbit'}, {'Cow', 'Horse'}, {'Cow', 'Dog'}, {'Rabbit', 'Horse'}, {'Rabbit', 'Dog'}, {'Horse', 'Dog'}, {'Fish', 'Dolphin'}, {'Fish', 'Oyster'}, {'Dolphin', 'Oyster'}, {'Broccoli', 'Fern'}, {'Broccoli', 'Onion'}, {'Broccoli', 'Apple'}, {'Fern', 'Onion'}, {'Fern', 'Apple'}, {'Onion', 'Apple'}, {'Cow', 'Rabbit', 'Horse'}, {'Cow', 'Rabbit', 'Dog'}, {'Cow', 'Horse', 'Dog'}, {'Rabbit', 'Horse', 'Dog'}, {'Fish', 'Dolphin', 'Oyster'}, {'Broccoli', 'Fern', 'Onion'}, {'Broccoli', 'Fern', 'Apple'}, {'Broccoli', 'Onion', 'Apple'}, {'Fern', 'Onion', 'Apple'}]
     edges_b = [{'Cow','Rabbit'},{'Cow','Fish'},{'Cow','Oyster'},{'Cow','Oyster'},{'Cow','Broccoli'},{'Cow','Onion'},{'Cow','Apple'},{'Rabbit','Fish'},{'Rabbit','Oyster'},{'Rabbit','Broccoli'},{'Rabbit','Onion'},{'Rabbit','Apple'},{'Fish','Oyster'},{'Fish','Broccoli'},{'Fish','Onion'},{'Fish','Apple'},{'Oyster','Broccoli'},{'Oyster','Onion'},{'Oyster','Apple'},{'Broccoli','Onion'},{'Broccoli','Apple'},{'Onion','Apple'},{'Horse','Dog'},{'Horse','Dolphin'},{'Horse','Fern'},{'Dog','Dolphin'},{'Dog','Fern'},{'Dolphin','Fern'},{'Cow','Broccoli','Apple'},{'Cow','Onion','Apple'},{'Rabbit','Broccoli','Apple'},{'Rabbit','Onion','Apple'},{'Fish','Broccoli','Apple'},{'Fish','Onion','Apple'},{'Oyster','Broccoli','Apple'},{'Oyster','Onion','Apple'}]
+    
+    vertex_set = [{x} for x in vertices]
 
-    rep = mk_complex(edges_b)
-    pprint(boundary_matrix(2, rep))
+    rep_a = mk_complex(edges_a + vertex_set)
+    rep_b = mk_complex(edges_b + vertex_set)
+
+    print("Part A ---------------------")
+    for dim in range(2, 0, -1):
+        print("Boundary Matrix for dim ", dim)
+        m, pre, post = boundary_matrix(dim, rep_a)
+        print("Rows correspond to ", post)
+        print("Columns correspond to ", pre)
+        pprint(np.asarray(m))
+
+    print("Part B ---------------------")
+    for dim in range(2, 0, -1):
+        print("Boundary Matrix for dim ", dim)
+        m, pre, post = boundary_matrix(dim, rep_b)
+        print("Rows correspond to ", post)
+        print("Columns correspond to ", pre)
+        pprint(np.asarray(m))
 
 
 
