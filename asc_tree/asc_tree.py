@@ -2,6 +2,7 @@ import networkx as nx
 from networkx.drawing.nx_agraph import write_dot, graphviz_layout
 import matplotlib.pyplot as plt
 from copy import deepcopy
+import numpy as np
 
 class Node:
     
@@ -78,6 +79,26 @@ class ASC_Tree:
                 visited.append(child)
         
         return visited, edges
+    
+    def get_boundary_matrix(self, dim):
+        
+        paths = self.get_paths() # inneficient
+        C_dim_generators = [set(x) for x in paths if len(x) == dim]
+        C_dim_minus_1_generators = [set(x) for x in paths if len(x) == dim - 1]
+        
+        if dim==1: C_dim_minus_1_generators = ["ROOT"]
+        
+        boundary_matrix = np.zeros(
+            (len(C_dim_minus_1_generators), len(C_dim_generators)),
+            dtype = int
+        )
+        
+        for i, row in enumerate(C_dim_minus_1_generators):
+            for j, col in enumerate(C_dim_generators):
+                if row.issubset(col):
+                    boundary_matrix[i][j] = 1
+
+        return boundary_matrix, C_dim_minus_1_generators, C_dim_generators
     
     def build_networkx_graph(self, name='nx_test.png'):
         nodes, edges = self.get_edges()

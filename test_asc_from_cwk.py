@@ -1,7 +1,8 @@
-from ast_tree import ASC_Tree
-
+# from ast_tree.ast_tree import ASC_Tree
+from asc_tree import asc_tree
+    
 def main():
-    simplicial_complex = ASC_Tree()
+    simplicial_complex = asc_tree.ASC_Tree()
     simplicial_complex.add_path(("Cow", "Rabbit"))
     simplicial_complex.add_path(("Cow", "Horse"))
     simplicial_complex.add_path(("Rabbit", "Horse"))
