@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Z2array(np.ndarray):
     """ class overloading a numpy array for addition
     """
@@ -13,6 +14,18 @@ class Z2array(np.ndarray):
     def __add__(self,x):
         return Z2array(np.array(self) + np.array(x))
     
+    def __mul__(self,x):
+        return Z2array(np.array(self) * np.array(x))
+    
+    def __rmul__(self,x):
+        return Z2array(np.array(self) * np.array(x))
+    
+    def __sub__(self,x):
+        return Z2array(np.array(self) - np.array(x))
+    
+    def __2sub__(self,x):
+        return Z2array(np.array(self) - np.array(x))
+    
     def __radd__(self,x):
         return Z2array(np.array(self) + np.array(x))
 
@@ -21,6 +34,7 @@ class Z2array(np.ndarray):
         """
         return self
 
+    
 if __name__ == "__main__":
     from asc_tree import asc_tree
 
