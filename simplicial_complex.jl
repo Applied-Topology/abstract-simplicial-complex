@@ -2,6 +2,7 @@ using LinearAlgebra
 using Combinatorics
 using DelimitedFiles
 using SparseArrays
+using Latexify
 
 include("new_sparse_coding.jl")
 """
@@ -77,7 +78,7 @@ Assumes that A, B are both sorted
 end 
 
 """
-    boundary_matrix(cech::Dict, k::Int)
+    boundary_matrix(cplx::Dict, k::Int)
 
 Constructs the boundary matrix ∂k → C_k -> C_{k-1} given a Cech complex, k dimension of the simplices in the complex 
 """
@@ -186,6 +187,17 @@ function get_deltas(data::Array, step::Int)
 end 
 
 
+"""
+    euler_characteristic(cplx::Dict)
+
+Returns the Euler characteristic of the simplicial complex 
+"""
+function euler_characteristic(cplx)
+    dims = sort(collect(keys(cplx)))
+    return reduce(+, [(-1)^dim * length(cplx[dim]) for dim in dims])
+end 
+
+
 include("persistence.jl")
 
 function main()
@@ -199,11 +211,27 @@ function main()
         @show (bettis)
         pd = mk_persistence_diagram(bettis)
         @show pd
-        pds[file] = pd
+        ecs = [euler_characteristic(cplx) for cplx in filtration]
+        pds[file] = (pd, deltas[1], deltas[end], bettis, ecs)
     end 
 
     for file in files 
-       plot_persistence(pds[file], filename=file[1:end-4])
+        plot_persistence(pds[file][1], filename=file[1:end-4], minmax=pds[file][2:3])
+        
+        bettis = pds[file][4]
+        fbet = transpose(hcat([collect(x) for x in bettis]...))
+        
+        bcs = []
+        for b in bettis
+            push!(bcs, reduce(+, [(-1)^(i-1)*b[i] for i=1:3]))
+        end 
+        ecs = pds[file][5]
+
+        open("tex/" * file[1:end-4] * ".tex", "w") do f
+            # temp = latexify(hcat(fbet, bcs, ecs))
+            temp = latexify(fbet)
+            println(f, temp)
+        end 
     end 
     # cplx = vrips_complex(data, deltas[4], 4)
     # BM3, cols3, rows3 = boundary_matrix(cplx, 3) 
